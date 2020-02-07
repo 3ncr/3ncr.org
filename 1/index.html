@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<title>3ncr.org - secure string encryption for go, node, php</title>
+<meta charset="utf-8">
+
+<style type="text/css">
+body { 
+	margin: 40px auto 40px 40px; 
+	max-width: 650px;
+	line-height:1.6;
+	font-size:12pt;
+	color:#444;
+	padding:0 10px
+}
+code,tt { font-size: 11pt !important;  }
+h1,h2,h3 { line-height:1.2 }
+img { display: block; margin: 30px 0 0 0;}
+small { font-family: sans-serif; font-size: 10pt; }
+faq qq { font-weight: bold; }
+faq qq, faq aa { display: block; }
+faq aa {  margin-bottom: 20pt; }
+faq cc { font-family: monospace; }
+table.example {
+	border-collapse: collapse; 
+}
+table.example td, table.example th { 
+	border: 1px solid #aaa; 
+	margin: 0; 
+	padding: 4pt;
+}
+table.example th { background-color: #eee; }
+pre { font-size: 10pt; }
+p.license { margin-left: 10pt; font-size: 8pt; }
+ul { padding-left: 2px; list-style-position: inside; }
+ul ul { padding-left: 1em; }
+</style>
+
+<script type="text/javascript">
+	window.onload = function() {
+		if (window.location.hash.length > 36) {
+			// somebody pasted 3ncr.org encrypted string here, which is not great (not terrible)
+			// let's still remove it 
+			window.location.replace('https://3ncr.org/1/');
+		}
+	}
+</script>
+
+
+<h1>3ncr.org</h1>
+
+<p>3ncr.org is a standard for string encryption/decryption (algorithms + storage format). Originally it was intended for encryption tokens in configuration files. It may be used to encrypt any UTF-8 strings. </p>
+
+<p>
+3ncr.org v1 uses AES-256-GCM for encryption, PKDBF2 with SHA3 for key derivation, base64 for encoding binary data back to string. It is fairly simple: 
+<blockquote>
+	<tt>header + base64(iv + aes-256-gcm(data) + tag)</tt>
+</blockquote>
+
+</p>
+
+<p>
+Encrypted data looks like this <tt>3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8</tt>
+</p>
+
+
+
+<h2>Official implementations:</h2>
+
+<p>The following libraries implement 3ncr.org version 1: 
+	<ul>
+		<li><a href="https://github.com/3ncr/tokencrypt">tokencrypt</a> (golang)</li>
+		<li><a href="https://github.com/3ncr/nodencrypt">nodencrypt</a> (node.js)</li>
+		<li><a href="https://github.com/3ncr/tokencrypt-php">tokencrypt-php</a> (PHP)</li>
+	</ul>
+	All these libraries are licenced under very permissive MIT license. 
+</p>
+
+<p>Send email to <tt>3ncr at andrian dot io</tt> if you want your implementation to be referenced here.</p>
+
+
+<h2>License</h2>
+
+<p>All original content at 3ncr.org is distributed under MIT license:</p>
+<p class="license">
+Copyright (c) 2018 3ncr.org 
+<br><br>
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+<br><br>
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+<br><br>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</p>
+
+
+
+
