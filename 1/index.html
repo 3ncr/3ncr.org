@@ -51,7 +51,7 @@ ul ul { padding-left: 1em; }
 <p>3ncr.org is a standard for string encryption/decryption (algorithms + storage format). Originally it was intended for encryption tokens in configuration files. It may be used to encrypt any UTF-8 strings. </p>
 
 <p>
-3ncr.org v1 uses AES-256-GCM for encryption, PKDBF2 with SHA3 for key derivation, base64 for encoding binary data back to string. It is fairly simple: 
+3ncr.org v1 uses AES-256-GCM for authenticated encryption and base64 for encoding binary data back to string. The envelope format is fairly simple:
 <blockquote>
 	<tt>header + base64(iv + aes-256-gcm(data) + tag)</tt>
 </blockquote>
@@ -62,6 +62,22 @@ ul ul { padding-left: 1em; }
 Encrypted data looks like this <tt>3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8</tt>
 </p>
 
+<p>
+The envelope format does not prescribe how the 32-byte AES key is obtained. A key may be supplied directly, or derived from a secret using a key derivation function (KDF). See <a href="#kdf">Key Derivation</a> below.
+</p>
+
+
+<h2 id="kdf">Key Derivation</h2>
+
+<p>
+The AES-256-GCM cipher takes a 32-byte key. Implementations should accept a raw 32-byte key as their primary input.
+</p>
+
+<h3>Legacy KDF (PBKDF2-SHA3)</h3>
+
+<p>
+PBKDF2 with SHA3-256, parameterised by <tt>secret</tt>, <tt>salt</tt> and <tt>iterations</tt> (default 1000), was the original KDF shipped with 3ncr.org v1 and is retained for backward compatibility with existing encrypted data. It is <b>not</b> recommended for new deployments: the iteration count is too low by modern standards, and PBKDF2 offers no memory-hardness against GPU/ASIC attackers. A recommended KDF for new code will be defined in a follow-up revision of this spec; until then, new code should supply the 32-byte AES key directly.
+</p>
 
 
 <h2>Official implementations:</h2>
