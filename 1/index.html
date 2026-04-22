@@ -70,13 +70,38 @@ The envelope format does not prescribe how the 32-byte AES key is obtained. A ke
 <h2 id="kdf">Key Derivation</h2>
 
 <p>
-The AES-256-GCM cipher takes a 32-byte key. Implementations should accept a raw 32-byte key as their primary input.
+The AES-256-GCM cipher takes a 32-byte key. Implementations should accept a raw 32-byte key as their primary input. When a raw key is not available, the recommended derivation depends on the entropy of the source material.
+</p>
+
+<h3>Recommended KDF for low-entropy secrets (passwords, passphrases)</h3>
+
+<p>
+Use <b>Argon2id</b>. For interoperability, implementations should default to these parameters so that the same secret and salt always produce the same derived key:
+</p>
+
+<ul>
+	<li>memory cost <tt>m = 19456</tt> KiB (19 MiB)</li>
+	<li>time cost <tt>t = 2</tt> iterations</li>
+	<li>parallelism <tt>p = 1</tt></li>
+	<li>output length: <tt>32</tt> bytes</li>
+	<li>salt: at least 16 random bytes, stored alongside the ciphertext or otherwise managed by the application</li>
+	<li>no associated data and no secret key</li>
+</ul>
+
+<p>
+These follow the OWASP Password Storage baseline for Argon2id and are compatible with RFC 9106. Implementations must use the raw key-derivation variant that returns 32 raw bytes, not the encoded-string "password hash" variant that embeds its own parameters.
+</p>
+
+<h3>Recommended KDF for high-entropy secrets (random keys, API tokens, etc.)</h3>
+
+<p>
+When the input already carries at least 128 bits of unique entropy — for example a random pre-shared key, a UUIDv4, or a sufficiently long random API token — a full password KDF is unnecessary. A single <b>SHA3-256</b> hash over the input produces a well-distributed 32-byte AES key. No salt or iteration count is required in this tier.
 </p>
 
 <h3>Legacy KDF (PBKDF2-SHA3)</h3>
 
 <p>
-PBKDF2 with SHA3-256, parameterised by <tt>secret</tt>, <tt>salt</tt> and <tt>iterations</tt> (default 1000), was the original KDF shipped with 3ncr.org v1 and is retained for backward compatibility with existing encrypted data. It is <b>not</b> recommended for new deployments: the iteration count is too low by modern standards, and PBKDF2 offers no memory-hardness against GPU/ASIC attackers. A recommended KDF for new code will be defined in a follow-up revision of this spec; until then, new code should supply the 32-byte AES key directly.
+PBKDF2 with SHA3-256, parameterised by <tt>secret</tt>, <tt>salt</tt> and <tt>iterations</tt> (default 1000), was the original KDF shipped with 3ncr.org v1 and is retained for backward compatibility with existing encrypted data. It is <b>not</b> recommended for new deployments: the default iteration count is too low by modern standards, and PBKDF2 offers no memory-hardness against GPU/ASIC attackers. New code should use one of the recommended KDFs above, or supply the 32-byte AES key directly.
 </p>
 
 
