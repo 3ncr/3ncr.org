@@ -134,6 +134,56 @@ PBKDF2 with SHA3-256, parameterised by <tt>secret</tt>, <tt>salt</tt> and <tt>it
 </p>
 
 
+<h2 id="testing">Testing a 3ncr.org implementation</h2>
+
+<p>
+Because 3ncr.org encryption is non-deterministic — a fresh random IV is generated on every call — two encryptions of the same plaintext under the same key produce different ciphertexts. There are therefore no fixed "encryption vectors" to match byte-for-byte. A conforming implementation should instead be exercised along the axes below.
+</p>
+
+<h3>Round-trip</h3>
+
+<p>
+The fundamental property: for any plaintext <tt>p</tt> and any key, <tt>decrypt(encrypt(p)) == p</tt>. Cover at minimum:
+</p>
+
+<ul>
+	<li>the empty string;</li>
+	<li>a single ASCII character;</li>
+	<li>a short ASCII string;</li>
+	<li>a UUID-shaped ASCII string (exercises a length that crosses the base64 / AES block boundaries awkwardly);</li>
+	<li>a multibyte UTF-8 string (e.g. Cyrillic, CJK, or emoji) to confirm the plaintext is treated as a UTF-8 byte sequence and not as fixed-width code units.</li>
+</ul>
+
+<h3>Decryption against known ciphertexts</h3>
+
+<p>
+While encryption is non-deterministic, <b>decryption is deterministic</b>: given a fixed key, a given ciphertext always yields the same plaintext. The reference implementations ship a small set of PBKDF2-SHA3 legacy ciphertexts with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. A new implementation can cross-check itself by decrypting these and comparing against the expected plaintexts. See the test suites of the <a href="https://github.com/3ncr/tokencrypt">Go</a>, <a href="https://github.com/3ncr/nodencrypt">Node.js</a>, and <a href="https://github.com/3ncr/tokencrypt-php">PHP</a> libraries for the current list.
+</p>
+
+<p>
+A more thorough option is a cross-implementation interop test: encrypt with implementation A, decrypt with implementation B, for every (A, B) pair of libraries one cares about. This is the only way to catch subtle divergences (base64 alphabet, padding rules, IV length, tag placement) without relying on a single reference.
+
+</p>
+
+<h3>Tamper detection</h3>
+
+<p>
+AES-GCM is authenticated encryption. Implementations must reject any input whose authentication tag does not verify. A useful test is to take a valid ciphertext, flip a single bit anywhere in the base64 payload (IV, ciphertext, or tag region), and confirm that decryption fails with an error rather than returning garbage plaintext. Truncated inputs shorter than <tt>28</tt> bytes after base64 decoding must also be rejected.
+</p>
+
+<h3>IV uniqueness</h3>
+
+<p>
+Encrypting the same plaintext twice with the same key must produce two different ciphertexts — if they are ever equal, the IV source is broken. A simple regression test is to call <tt>encrypt</tt> twice on the same input and assert the resulting strings differ. The first 12 bytes of the decoded payload are the IV; their distribution across many encryptions should be indistinguishable from random.
+</p>
+
+<h3>Envelope shape</h3>
+
+<p>
+The <tt>decryptIf3ncr</tt> convenience function must return the original string unchanged when the input does not start with the <tt>3ncr.org/1#</tt> header. This branch is easy to miss in tests because the happy path exercises only the encrypted form.
+</p>
+
+
 <h2>Official implementations:</h2>
 
 <p>The following libraries implement 3ncr.org version 1: 
