@@ -67,6 +67,35 @@ The envelope format does not prescribe how the 32-byte AES key is obtained. A ke
 </p>
 
 
+<h2 id="envelope">Envelope Format</h2>
+
+<p>
+A 3ncr.org v1 string consists of the literal header <tt>3ncr.org/1#</tt> followed by the base64 encoding of the binary payload. The binary payload is the concatenation of three fixed-layout fields:
+</p>
+
+<blockquote>
+	<tt>iv[12] || ciphertext[N] || tag[16]</tt>
+</blockquote>
+
+<ul>
+	<li><b>iv</b> — 12 bytes (96 bits). A fresh, cryptographically random value generated per encryption. This is the IV length recommended by NIST SP 800-38D for AES-GCM.</li>
+	<li><b>ciphertext</b> — <tt>N</tt> bytes, where <tt>N</tt> equals the length in bytes of the UTF-8 encoded plaintext. AES-GCM is a stream cipher in counter mode, so the ciphertext length matches the plaintext length exactly (no padding).</li>
+	<li><b>tag</b> — 16 bytes (128 bits). The AES-GCM authentication tag. Decoders must verify the tag and reject the input if verification fails.</li>
+</ul>
+
+<p>
+The AES key is always <b>32 bytes</b> (AES-256). No associated data (AAD) is used.
+</p>
+
+<p>
+The payload is encoded using <b>standard base64</b> (RFC 4648 §4 alphabet: <tt>A–Z</tt>, <tt>a–z</tt>, <tt>0–9</tt>, <tt>+</tt>, <tt>/</tt>) <b>without padding</b>: any trailing <tt>=</tt> characters produced by a padded encoder must be stripped before emission. Decoders should accept input with or without padding for robustness.
+</p>
+
+<p>
+The minimum binary payload length is <tt>12 + 0 + 16 = 28</tt> bytes, which base64-encodes to 38 characters (no padding).
+</p>
+
+
 <h2 id="kdf">Key Derivation</h2>
 
 <p>
