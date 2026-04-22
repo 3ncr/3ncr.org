@@ -297,17 +297,26 @@ $("decrypt-btn").addEventListener("click", () => run(async () => {
 }));
 
 const VECTORS = [
+	{ pt: "",                                         ct: "3ncr.org/1#gZJaluDTQCZuN1t96F0JnFOpZFeF2s3JdLSy4Q" },
 	{ pt: "a",                                        ct: "3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8" },
 	{ pt: "test",                                     ct: "3ncr.org/1#Y3/v2PY7kYQgveAn4AJ8zP+oOuysbs5btYLZ9vl8DLc" },
 	{ pt: "08019215-B205-4416-B2FB-132962F9952F",     ct: "3ncr.org/1#pHRufQld0SajqjHx+FmLMcORfNQi1d674ziOPpG52hqW5+0zfJD91hjXsBsvULVtB017mEghGy3Ohj+GgQY5MQ" },
 	{ pt: "перевірка",                                ct: "3ncr.org/1#EPw7S5+BG6hn/9Sjf6zoYUCdwlzweeB+ahBIabUD6NogAcevXszOGHz9Jzv4vQ" },
+	{ pt: "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump!",
+	  ct: "3ncr.org/1#jcHalWX7XnMaCG7jU/mBnaIS06gX+0xZo7isiXoKmMzr9NKOUBfis/gmrnX/uKIaIvizUMeFJy7dYKrpofjKrzEpUpihWbk7gLhxLzWKy8b5LpkLHTruO1A8TPg5KqXKFkoDg2Lvbyq/2nBSL20NTVoqzgRFHmNcYfPIZFqvWcCgaSKhU+b3JKZVGQO+Wyvvhp40c0Lg" },
 ];
 
 const tbody = $("vectors-body");
 for (const v of VECTORS) {
 	const tr = document.createElement("tr");
 	const tdPt = document.createElement("td");
-	tdPt.textContent = v.pt;
+	if (v.pt === "") {
+		const small = document.createElement("small");
+		small.textContent = "(empty string)";
+		tdPt.appendChild(small);
+	} else {
+		tdPt.textContent = v.pt;
+	}
 	const tdCt = document.createElement("td");
 	tdCt.className = "ct";
 	tdCt.textContent = v.ct;

@@ -162,7 +162,7 @@ The fundamental property: for any plaintext <tt>p</tt> and any key, <tt>decrypt(
 <h3>Decryption against known ciphertexts</h3>
 
 <p>
-While encryption is non-deterministic, <b>decryption is deterministic</b>: given a fixed key, a given ciphertext always yields the same plaintext. The canonical v1 test vectors below use the legacy PBKDF2-SHA3 KDF with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. A new implementation can cross-check itself by decrypting each ciphertext and comparing against the expected plaintext. The same vectors are pre-loaded into the <a href="demo/">browser demo</a> so they can be decrypted interactively.
+While encryption is non-deterministic, <b>decryption is deterministic</b>: given a fixed key, a given ciphertext always yields the same plaintext. The canonical v1 test vectors below use the legacy PBKDF2-SHA3 KDF with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. A new implementation can cross-check itself by decrypting each ciphertext and comparing against the expected plaintext. The vectors are ordered by plaintext length and deliberately cover the edge cases listed under <a href="#testing">Round-trip</a> above: the empty string, a single ASCII character, a short ASCII string, a UUID-shaped ASCII string, a multibyte UTF-8 string, and a longer multi-sentence ASCII string that crosses several AES blocks. The same vectors are pre-loaded into the <a href="demo/">browser demo</a> so they can be decrypted interactively.
 </p>
 
 <table class="example">
@@ -170,10 +170,12 @@ While encryption is non-deterministic, <b>decryption is deterministic</b>: given
 <tr><th>Plaintext</th><th>Ciphertext</th></tr>
 </thead>
 <tbody>
+<tr><td><small>(empty string)</small></td><td><tt>3ncr.org/1#gZJaluDTQCZuN1t96F0JnFOpZFeF2s3JdLSy4Q</tt></td></tr>
 <tr><td><tt>a</tt></td><td><tt>3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8</tt></td></tr>
 <tr><td><tt>test</tt></td><td><tt>3ncr.org/1#Y3/v2PY7kYQgveAn4AJ8zP+oOuysbs5btYLZ9vl8DLc</tt></td></tr>
 <tr><td><tt>08019215-B205-4416-B2FB-132962F9952F</tt></td><td><tt>3ncr.org/1#pHRufQld0SajqjHx+FmLMcORfNQi1d674ziOPpG52hqW5+0zfJD91hjXsBsvULVtB017mEghGy3Ohj+GgQY5MQ</tt></td></tr>
 <tr><td><tt>перевірка</tt></td><td><tt>3ncr.org/1#EPw7S5+BG6hn/9Sjf6zoYUCdwlzweeB+ahBIabUD6NogAcevXszOGHz9Jzv4vQ</tt></td></tr>
+<tr><td><tt>The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump!</tt></td><td><tt>3ncr.org/1#jcHalWX7XnMaCG7jU/mBnaIS06gX+0xZo7isiXoKmMzr9NKOUBfis/gmrnX/uKIaIvizUMeFJy7dYKrpofjKrzEpUpihWbk7gLhxLzWKy8b5LpkLHTruO1A8TPg5KqXKFkoDg2Lvbyq/2nBSL20NTVoqzgRFHmNcYfPIZFqvWcCgaSKhU+b3JKZVGQO+Wyvvhp40c0Lg</tt></td></tr>
 </tbody>
 </table>
 
