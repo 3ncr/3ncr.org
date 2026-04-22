@@ -23,10 +23,11 @@ faq cc { font-family: monospace; }
 table.example {
 	border-collapse: collapse; 
 }
-table.example td, table.example th { 
-	border: 1px solid #aaa; 
-	margin: 0; 
+table.example td, table.example th {
+	border: 1px solid #aaa;
+	margin: 0;
 	padding: 4pt;
+	word-break: break-all;
 }
 table.example th { background-color: #eee; }
 pre { font-size: 10pt; }
@@ -161,8 +162,20 @@ The fundamental property: for any plaintext <tt>p</tt> and any key, <tt>decrypt(
 <h3>Decryption against known ciphertexts</h3>
 
 <p>
-While encryption is non-deterministic, <b>decryption is deterministic</b>: given a fixed key, a given ciphertext always yields the same plaintext. The reference implementations ship a small set of PBKDF2-SHA3 legacy ciphertexts with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. A new implementation can cross-check itself by decrypting these and comparing against the expected plaintexts. See the test suites of the <a href="https://github.com/3ncr/tokencrypt">Go</a>, <a href="https://github.com/3ncr/nodencrypt">Node.js</a>, and <a href="https://github.com/3ncr/tokencrypt-php">PHP</a> libraries for the current list, or try them in the <a href="demo/">browser demo</a>.
+While encryption is non-deterministic, <b>decryption is deterministic</b>: given a fixed key, a given ciphertext always yields the same plaintext. The canonical v1 test vectors below use the legacy PBKDF2-SHA3 KDF with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. A new implementation can cross-check itself by decrypting each ciphertext and comparing against the expected plaintext. The same vectors are pre-loaded into the <a href="demo/">browser demo</a> so they can be decrypted interactively.
 </p>
+
+<table class="example">
+<thead>
+<tr><th>Plaintext</th><th>Ciphertext</th></tr>
+</thead>
+<tbody>
+<tr><td><tt>a</tt></td><td><tt>3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8</tt></td></tr>
+<tr><td><tt>test</tt></td><td><tt>3ncr.org/1#Y3/v2PY7kYQgveAn4AJ8zP+oOuysbs5btYLZ9vl8DLc</tt></td></tr>
+<tr><td><tt>08019215-B205-4416-B2FB-132962F9952F</tt></td><td><tt>3ncr.org/1#pHRufQld0SajqjHx+FmLMcORfNQi1d674ziOPpG52hqW5+0zfJD91hjXsBsvULVtB017mEghGy3Ohj+GgQY5MQ</tt></td></tr>
+<tr><td><tt>перевірка</tt></td><td><tt>3ncr.org/1#EPw7S5+BG6hn/9Sjf6zoYUCdwlzweeB+ahBIabUD6NogAcevXszOGHz9Jzv4vQ</tt></td></tr>
+</tbody>
+</table>
 
 <p>
 A more thorough option is a cross-implementation interop test: encrypt with implementation A, decrypt with implementation B, for every (A, B) pair of libraries one cares about. This is the only way to catch subtle divergences (base64 alphabet, padding rules, IV length, tag placement) without relying on a single reference.
