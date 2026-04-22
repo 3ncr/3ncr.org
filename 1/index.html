@@ -66,6 +66,10 @@ Encrypted data looks like this <tt>3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEd
 The envelope format does not prescribe how the 32-byte AES key is obtained. A key may be supplied directly, or derived from a secret using a key derivation function (KDF). See <a href="#kdf">Key Derivation</a> below.
 </p>
 
+<p>
+A self-contained <a href="demo/">browser demo</a> is available for encrypting and decrypting 3ncr.org v1 values without installing any library.
+</p>
+
 
 <h2 id="envelope">Envelope Format</h2>
 
@@ -157,7 +161,7 @@ The fundamental property: for any plaintext <tt>p</tt> and any key, <tt>decrypt(
 <h3>Decryption against known ciphertexts</h3>
 
 <p>
-While encryption is non-deterministic, <b>decryption is deterministic</b>: given a fixed key, a given ciphertext always yields the same plaintext. The reference implementations ship a small set of PBKDF2-SHA3 legacy ciphertexts with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. A new implementation can cross-check itself by decrypting these and comparing against the expected plaintexts. See the test suites of the <a href="https://github.com/3ncr/tokencrypt">Go</a>, <a href="https://github.com/3ncr/nodencrypt">Node.js</a>, and <a href="https://github.com/3ncr/tokencrypt-php">PHP</a> libraries for the current list.
+While encryption is non-deterministic, <b>decryption is deterministic</b>: given a fixed key, a given ciphertext always yields the same plaintext. The reference implementations ship a small set of PBKDF2-SHA3 legacy ciphertexts with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. A new implementation can cross-check itself by decrypting these and comparing against the expected plaintexts. See the test suites of the <a href="https://github.com/3ncr/tokencrypt">Go</a>, <a href="https://github.com/3ncr/nodencrypt">Node.js</a>, and <a href="https://github.com/3ncr/tokencrypt-php">PHP</a> libraries for the current list, or try them in the <a href="demo/">browser demo</a>.
 </p>
 
 <p>

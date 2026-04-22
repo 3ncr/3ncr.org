@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<title>3ncr.org v1 — browser demo</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+body {
+	margin: 40px auto 40px 40px;
+	max-width: 720px;
+	line-height: 1.6;
+	font-size: 12pt;
+	color: #444;
+	padding: 0 10px;
+}
+code, tt, textarea, input[type=text], input[type=number] {
+	font-family: monospace;
+}
+textarea, input[type=text], input[type=number] {
+	font-size: 11pt;
+}
+h1, h2, h3 { line-height: 1.2; }
+small { font-family: sans-serif; font-size: 10pt; }
+fieldset {
+	margin: 10pt 0 15pt 0;
+	padding: 8pt 12pt 12pt 12pt;
+	border: 1px solid #ccc;
+}
+legend { font-weight: bold; padding: 0 6pt; }
+label.mode { display: block; margin-top: 8pt; font-weight: bold; }
+label.mode input { margin-right: 6pt; }
+.params { margin: 4pt 0 6pt 22pt; display: grid; grid-template-columns: auto 1fr; gap: 4pt 8pt; align-items: baseline; }
+.params label { font-weight: normal; }
+.params input[type=text], .params input[type=number] { width: 100%; box-sizing: border-box; }
+textarea {
+	width: 100%;
+	box-sizing: border-box;
+	resize: vertical;
+}
+.message-label { display: block; margin: 8pt 0 2pt 0; font-weight: bold; }
+.buttons { margin-top: 12pt; }
+button {
+	padding: 6pt 14pt;
+	margin-right: 8pt;
+	cursor: pointer;
+	font-size: 11pt;
+}
+#status { min-height: 1.4em; font-family: monospace; font-size: 10pt; white-space: pre-wrap; margin-top: 8pt; }
+#status.err { color: #b00020; }
+#status.ok { color: #0a7f2e; }
+.warn {
+	background: #fff7d6;
+	border-left: 4px solid #e1b94a;
+	padding: 8pt 12pt;
+	margin: 12pt 0;
+	font-size: 10pt;
+	line-height: 1.5;
+}
+table.vectors { border-collapse: collapse; font-size: 10pt; }
+table.vectors td, table.vectors th { border: 1px solid #aaa; padding: 4pt 6pt; vertical-align: top; }
+table.vectors th { background-color: #eee; }
+table.vectors td.ct { font-family: monospace; word-break: break-all; max-width: 380px; }
+table.vectors button { padding: 2pt 6pt; font-size: 9pt; margin: 0; }
+p.license { margin-left: 10pt; font-size: 8pt; font-family: sans-serif; }
+</style>
+
+
+<h1>3ncr.org v1 — browser demo</h1>
+
+<p><small><a href="..">← back to the v1 spec</a></small></p>
+
+<p>
+A self-contained in-browser implementation of 3ncr.org v1 encryption and decryption. Useful for experimenting with the envelope format, cross-checking canonical test vectors, and confirming that a library implementation agrees with another language stack without installing one.
+</p>
+
+<div class="warn">
+<b>Demo only.</b> This page runs entirely in your browser — nothing is uploaded — but a production-grade secret still should not be pasted into a web page. Browser extensions, devtools, history, clipboard managers, and swap files can all retain the values you enter. Use the demo with throwaway keys and sample data.
+</div>
+
+<p>
+AES-256-GCM is provided by the browser's native WebCrypto API. SHA3-256, PBKDF2-SHA3 (legacy), and Argon2id are provided by the <a href="https://github.com/paulmillr/noble-hashes">@noble/hashes</a> library, loaded from <tt>esm.sh</tt> at runtime.
+</p>
+
+
+<h2>Key</h2>
+
+<fieldset>
+<legend>Key source</legend>
+
+<label class="mode"><input type="radio" name="kdf" value="raw" checked> Raw 32-byte key</label>
+<div class="params" data-mode="raw">
+	<label for="raw-key">Key (64 hex chars):</label>
+	<input type="text" id="raw-key" spellcheck="false" autocomplete="off" placeholder="e.g. 0000000000000000000000000000000000000000000000000000000000000000">
+</div>
+
+<label class="mode"><input type="radio" name="kdf" value="argon2id"> Argon2id (recommended for passphrases)</label>
+<div class="params" data-mode="argon2id">
+	<label for="argon2-secret">Secret:</label>
+	<input type="text" id="argon2-secret" spellcheck="false" autocomplete="off">
+	<label for="argon2-salt">Salt:</label>
+	<input type="text" id="argon2-salt" spellcheck="false" autocomplete="off">
+	<label for="argon2-m">Memory (KiB):</label>
+	<input type="number" id="argon2-m" value="19456" min="8">
+	<label for="argon2-t">Iterations (t):</label>
+	<input type="number" id="argon2-t" value="2" min="1">
+	<label for="argon2-p">Parallelism (p):</label>
+	<input type="number" id="argon2-p" value="1" min="1">
+</div>
+
+<label class="mode"><input type="radio" name="kdf" value="sha3"> SHA3-256 (for high-entropy secrets)</label>
+<div class="params" data-mode="sha3">
+	<label for="sha3-secret">Secret:</label>
+	<input type="text" id="sha3-secret" spellcheck="false" autocomplete="off">
+</div>
+
+<label class="mode"><input type="radio" name="kdf" value="pbkdf2-sha3"> Legacy: PBKDF2-SHA3</label>
+<div class="params" data-mode="pbkdf2-sha3">
+	<label for="pbkdf2-secret">Secret:</label>
+	<input type="text" id="pbkdf2-secret" value="a" spellcheck="false" autocomplete="off">
+	<label for="pbkdf2-salt">Salt:</label>
+	<input type="text" id="pbkdf2-salt" value="b" spellcheck="false" autocomplete="off">
+	<label for="pbkdf2-iter">Iterations:</label>
+	<input type="number" id="pbkdf2-iter" value="1000" min="1">
+</div>
+</fieldset>
+
+
+<h2>Message</h2>
+
+<label class="message-label" for="plaintext">Plaintext (UTF-8):</label>
+<textarea id="plaintext" rows="3" spellcheck="false" placeholder="hello 3ncr.org"></textarea>
+
+<label class="message-label" for="ciphertext">Ciphertext:</label>
+<textarea id="ciphertext" rows="3" spellcheck="false" placeholder="3ncr.org/1#…"></textarea>
+
+<div class="buttons">
+<button id="encrypt-btn">Encrypt ↓</button>
+<button id="decrypt-btn">Decrypt ↑</button>
+</div>
+
+<p id="status"></p>
+
+
+<h2>Canonical v1 test vectors</h2>
+
+<p>
+These ciphertexts are reproduced verbatim from the v1 spec and use the legacy PBKDF2-SHA3 KDF with <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>. Click <b>Load</b> to populate the demo with the ciphertext and matching KDF settings, then press <b>Decrypt</b>.
+</p>
+
+<table class="vectors">
+<thead>
+<tr><th>Plaintext</th><th>Ciphertext</th><th></th></tr>
+</thead>
+<tbody id="vectors-body">
+</tbody>
+</table>
+
+
+<h2>Source</h2>
+
+<p>
+The full source of this page is a single HTML file: <a href="./index.html">view source</a>. It mirrors the reference implementations (<a href="https://github.com/3ncr/tokencrypt">Go</a>, <a href="https://github.com/3ncr/nodencrypt">Node.js</a>, <a href="https://github.com/3ncr/tokencrypt-php">PHP</a>) and is small enough to read end-to-end.
+</p>
+
+
+<script type="module">
+import { sha3_256 } from "https://esm.sh/@noble/hashes@2.2.0/sha3";
+import { pbkdf2Async } from "https://esm.sh/@noble/hashes@2.2.0/pbkdf2";
+import { argon2idAsync } from "https://esm.sh/@noble/hashes@2.2.0/argon2";
+
+const HEADER = "3ncr.org/1#";
+const IV_LEN = 12;
+const TAG_LEN = 16;
+
+const $ = (id) => document.getElementById(id);
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+function hexToBytes(hex) {
+	const s = hex.trim().replace(/\s+/g, "");
+	if (!/^[0-9a-fA-F]*$/.test(s)) throw new Error("key must be hexadecimal");
+	if (s.length !== 64) throw new Error("key must be 64 hex chars (32 bytes); got " + s.length);
+	const out = new Uint8Array(32);
+	for (let i = 0; i < 32; i++) out[i] = parseInt(s.substring(i * 2, i * 2 + 2), 16);
+	return out;
+}
+
+function bytesToBase64NoPad(bytes) {
+	let s = "";
+	for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+	return btoa(s).replace(/=+$/, "");
+}
+
+function base64ToBytes(b64) {
+	let s = b64.trim();
+	while (s.length % 4 !== 0) s += "=";
+	const bin = atob(s);
+	const out = new Uint8Array(bin.length);
+	for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+	return out;
+}
+
+async function deriveKey() {
+	const mode = document.querySelector('input[name="kdf"]:checked').value;
+	if (mode === "raw") {
+		return hexToBytes($("raw-key").value);
+	}
+	if (mode === "sha3") {
+		const secret = $("sha3-secret").value;
+		if (!secret) throw new Error("SHA3-256 mode requires a secret");
+		return sha3_256(enc.encode(secret));
+	}
+	if (mode === "argon2id") {
+		const secret = $("argon2-secret").value;
+		const salt = $("argon2-salt").value;
+		if (!secret) throw new Error("Argon2id mode requires a secret");
+		if (!salt) throw new Error("Argon2id mode requires a salt");
+		const m = parseInt($("argon2-m").value, 10);
+		const t = parseInt($("argon2-t").value, 10);
+		const p = parseInt($("argon2-p").value, 10);
+		return await argon2idAsync(enc.encode(secret), enc.encode(salt), { m, t, p, dkLen: 32 });
+	}
+	if (mode === "pbkdf2-sha3") {
+		const secret = $("pbkdf2-secret").value;
+		const salt = $("pbkdf2-salt").value;
+		const iter = parseInt($("pbkdf2-iter").value, 10);
+		if (iter < 1) throw new Error("iterations must be >= 1");
+		return await pbkdf2Async(sha3_256, enc.encode(secret), enc.encode(salt), { c: iter, dkLen: 32 });
+	}
+	throw new Error("unknown KDF mode: " + mode);
+}
+
+async function importAesKey(rawKey) {
+	return await crypto.subtle.importKey(
+		"raw",
+		rawKey,
+		{ name: "AES-GCM" },
+		false,
+		["encrypt", "decrypt"],
+	);
+}
+
+async function encrypt3ncr(plaintext) {
+	const key = await importAesKey(await deriveKey());
+	const iv = crypto.getRandomValues(new Uint8Array(IV_LEN));
+	const ct = new Uint8Array(await crypto.subtle.encrypt(
+		{ name: "AES-GCM", iv, tagLength: TAG_LEN * 8 },
+		key,
+		enc.encode(plaintext),
+	));
+	const payload = new Uint8Array(IV_LEN + ct.length);
+	payload.set(iv, 0);
+	payload.set(ct, IV_LEN);
+	return HEADER + bytesToBase64NoPad(payload);
+}
+
+async function decrypt3ncr(input) {
+	if (!input.startsWith(HEADER)) throw new Error("input does not start with " + HEADER);
+	const payload = base64ToBytes(input.slice(HEADER.length));
+	if (payload.length < IV_LEN + TAG_LEN) throw new Error("ciphertext shorter than " + (IV_LEN + TAG_LEN) + " bytes");
+	const iv = payload.subarray(0, IV_LEN);
+	const ctAndTag = payload.subarray(IV_LEN);
+	const key = await importAesKey(await deriveKey());
+	const pt = await crypto.subtle.decrypt(
+		{ name: "AES-GCM", iv, tagLength: TAG_LEN * 8 },
+		key,
+		ctAndTag,
+	);
+	return dec.decode(pt);
+}
+
+function setStatus(text, cls) {
+	const el = $("status");
+	el.textContent = text;
+	el.className = cls || "";
+}
+
+async function run(fn) {
+	setStatus("working…");
+	try {
+		await fn();
+	} catch (e) {
+		setStatus("error: " + (e && e.message ? e.message : String(e)), "err");
+	}
+}
+
+$("encrypt-btn").addEventListener("click", () => run(async () => {
+	const out = await encrypt3ncr($("plaintext").value);
+	$("ciphertext").value = out;
+	setStatus("ok — encrypted " + enc.encode($("plaintext").value).length + " plaintext bytes", "ok");
+}));
+
+$("decrypt-btn").addEventListener("click", () => run(async () => {
+	const out = await decrypt3ncr($("ciphertext").value);
+	$("plaintext").value = out;
+	setStatus("ok — decrypted to " + enc.encode(out).length + " plaintext bytes", "ok");
+}));
+
+const VECTORS = [
+	{ pt: "a",                                        ct: "3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8" },
+	{ pt: "test",                                     ct: "3ncr.org/1#Y3/v2PY7kYQgveAn4AJ8zP+oOuysbs5btYLZ9vl8DLc" },
+	{ pt: "08019215-B205-4416-B2FB-132962F9952F",     ct: "3ncr.org/1#pHRufQld0SajqjHx+FmLMcORfNQi1d674ziOPpG52hqW5+0zfJD91hjXsBsvULVtB017mEghGy3Ohj+GgQY5MQ" },
+	{ pt: "перевірка",                                ct: "3ncr.org/1#EPw7S5+BG6hn/9Sjf6zoYUCdwlzweeB+ahBIabUD6NogAcevXszOGHz9Jzv4vQ" },
+];
+
+const tbody = $("vectors-body");
+for (const v of VECTORS) {
+	const tr = document.createElement("tr");
+	const tdPt = document.createElement("td");
+	tdPt.textContent = v.pt;
+	const tdCt = document.createElement("td");
+	tdCt.className = "ct";
+	tdCt.textContent = v.ct;
+	const tdBtn = document.createElement("td");
+	const btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "Load";
+	btn.addEventListener("click", () => {
+		document.querySelector('input[name="kdf"][value="pbkdf2-sha3"]').checked = true;
+		$("pbkdf2-secret").value = "a";
+		$("pbkdf2-salt").value = "b";
+		$("pbkdf2-iter").value = "1000";
+		$("ciphertext").value = v.ct;
+		$("plaintext").value = "";
+		setStatus("loaded test vector; press Decrypt", "");
+	});
+	tdBtn.appendChild(btn);
+	tr.appendChild(tdPt);
+	tr.appendChild(tdCt);
+	tr.appendChild(tdBtn);
+	tbody.appendChild(tr);
+}
+</script>
+
+
+<h2>License</h2>
+
+<p class="license">
+Copyright (c) 2018 3ncr.org.
+This demo page is distributed under the MIT license, the same license as the rest of 3ncr.org.
+</p>
