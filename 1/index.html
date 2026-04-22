@@ -134,6 +134,44 @@ PBKDF2 with SHA3-256, parameterised by <tt>secret</tt>, <tt>salt</tt> and <tt>it
 </p>
 
 
+<h2 id="test-vectors">Test Vectors</h2>
+
+<p>
+Implementations of 3ncr.org v1 should be verified against the following canonical test vectors. They use the legacy PBKDF2-SHA3 KDF with parameters <tt>secret = "a"</tt>, <tt>salt = "b"</tt>, <tt>iterations = 1000</tt>.
+</p>
+
+<p>
+Encryption is non-deterministic (a fresh random IV is generated per encryption), so implementations cannot reproduce these exact ciphertexts. Instead, <b>decrypting</b> each encrypted value below must yield the corresponding plaintext. Round-trip encrypt-then-decrypt of the plaintexts must also succeed.
+</p>
+
+<table class="example">
+	<tr>
+		<th>Encrypted</th>
+		<th>Plaintext</th>
+	</tr>
+	<tr>
+		<td><tt>3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8</tt></td>
+		<td><tt>a</tt></td>
+	</tr>
+	<tr>
+		<td><tt>3ncr.org/1#Y3/v2PY7kYQgveAn4AJ8zP+oOuysbs5btYLZ9vl8DLc</tt></td>
+		<td><tt>test</tt></td>
+	</tr>
+	<tr>
+		<td><tt>3ncr.org/1#pHRufQld0SajqjHx+FmLMcORfNQi1d674ziOPpG52hqW5+0zfJD91hjXsBsvULVtB017mEghGy3Ohj+GgQY5MQ</tt></td>
+		<td><tt>08019215-B205-4416-B2FB-132962F9952F</tt></td>
+	</tr>
+	<tr>
+		<td><tt>3ncr.org/1#EPw7S5+BG6hn/9Sjf6zoYUCdwlzweeB+ahBIabUD6NogAcevXszOGHz9Jzv4vQ</tt></td>
+		<td><tt>перевірка</tt></td>
+	</tr>
+</table>
+
+<p>
+These vectors cover a single character, a short ASCII string, a UUID-shaped ASCII string, and a multibyte UTF-8 string, which together exercise the base64 encoding boundaries and UTF-8 byte-length handling. The same vectors are embedded in the test suites of the <a href="https://github.com/3ncr/tokencrypt">Go</a>, <a href="https://github.com/3ncr/nodencrypt">Node.js</a>, and <a href="https://github.com/3ncr/tokencrypt-php">PHP</a> reference implementations.
+</p>
+
+
 <h2>Official implementations:</h2>
 
 <p>The following libraries implement 3ncr.org version 1: 
