@@ -49,7 +49,7 @@ ul ul { padding-left: 1em; }
 
 <h1>3ncr.org</h1>
 
-<p>3ncr.org is a standard for string encryption/decryption (algorithms + storage format). Originally it was intended for encryption tokens in configuration files. It may be used to encrypt any UTF-8 strings. </p>
+<p>3ncr.org is a tiny encrypted-string format for config values, tokens, and app secrets. It lets you encrypt a UTF-8 string in one language, store it as a recognizable value, and decrypt it in another.</p>
 
 <p>
 3ncr.org v1 uses AES-256-GCM for authenticated encryption and base64 for encoding binary data back to string. The envelope format is fairly simple:
